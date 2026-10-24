@@ -1,0 +1,7 @@
+# Slicer output
+*.gcode
+*.ufp
+
+# Windows
+Thumbs.db
+desktop.ini
