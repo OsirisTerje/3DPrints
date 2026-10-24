@@ -1,6 +1,8 @@
 # 3DPrints
 
-OpenSCAD designs for 3D-printed mounting brackets.
+OpenSCAD designs for 3D-printed mounting brackets, plus older STL-only designs.
+
+**[Catalog](catalog.md)**: every model with its size and a thumbnail. Regenerate it with `python tools/make_thumbnails.py` and `python tools/make_catalog.py`.
 
 ## Parts
 
