@@ -11,6 +11,22 @@ OpenSCAD designs for 3D-printed mounting brackets.
 
 Both are U-brackets with a slot in each upright for the PCB edge. The shared geometry is in `bracket_lib.scad`; each part file only sets its dimensions.
 
+### Older designs (STL only)
+
+Made in Tinkercad and other tools before the move to OpenSCAD. No source files.
+
+| Folder                     | Contents                                              |
+|----------------------------|-------------------------------------------------------|
+| `brackets`                 | Mounting brackets for servos, decoders and boards     |
+| `Diverse`                  | Holders, clamps, servo sliders and other small parts  |
+| `DualSignalBox`            | Signal box enclosure and board brackets               |
+| `Servo mount`              | Servo mount remixes (see the README in the folder)    |
+| `Hjulbraketter`            | Wheel alignment brackets                              |
+| `Ute`                      | Clamps and garden hose brackets                       |
+| `Isabel`                   | Box, cover and flow bracket                           |
+| `ballastspreaders`         | Ballast spreader tools                                |
+| `Bracket for Uno-vertical`, `Powersupplybracket`, `RelayBoardBracket`, `Voltmeter`, `Platting` | Single parts |
+
 ## Building
 
 Open a part file in [OpenSCAD](https://openscad.org) (a development snapshot with the Manifold backend is recommended), press F6 to render and F7 to export. From the command line:
