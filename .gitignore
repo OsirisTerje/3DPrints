@@ -5,3 +5,6 @@
 # Windows
 Thumbs.db
 desktop.ini
+
+# Private chat log redaction rules
+tools/chatlog_redact.txt

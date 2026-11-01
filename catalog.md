@@ -1,14 +1,14 @@
 # 3DPrints catalog
 
-78 models.
+80 models.
 
 
 ## (root)
 
 | Name | Size W × D × H (mm) | Thumbnail |
 |---|---|---|
-| svb_bracket_small | 70.0 × 14.9 × 10.0 | <img src="svb_bracket_small.png" width="128"> |
-| svb_power_bracket | 71.0 × 14.9 × 20.0 | <img src="svb_power_bracket.png" width="128"> |
+| svb_bracket_small | 80.0 × 24.9 × 10.0 | <img src="svb_bracket_small.png" width="128"> |
+| svb_power_bracket | 81.7 × 24.9 × 20.0 | <img src="svb_power_bracket.png" width="128"> |
 
 ## ballastspreaders
 
@@ -77,6 +77,13 @@
 | Power Converter Board | 51.0 × 47.0 × 10.0 | <img src="DualSignalBox/Power%20Converter%20Board.png" width="128"> |
 | Small Motorboards | 100.0 × 137.0 × 11.0 | <img src="DualSignalBox/Small%20Motorboards.png" width="128"> |
 | Track detector Board | 76.0 × 57.0 × 10.0 | <img src="DualSignalBox/Track%20detector%20Board.png" width="128"> |
+
+## Fossli
+
+| Name | Size W × D × H (mm) | Thumbnail |
+|---|---|---|
+| fossli_led_holder_left | 82.0 × 33.8 × 3.0 | <img src="Fossli/fossli_led_holder_left.png" width="128"> |
+| fossli_led_holder_right | 34.8 × 52.4 × 3.0 | <img src="Fossli/fossli_led_holder_right.png" width="128"> |
 
 ## Hjulbraketter
 

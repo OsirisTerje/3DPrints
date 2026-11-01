@@ -12,7 +12,8 @@
 //   Infill            40 %, Gyroid (strong in all directions)
 //   Printing Temp     +5..10 °C over your normal PLA profile, for better layer bonding
 //   Fan Speed         reduce to ~50 %, same reason
-//   Adhesion          Brim, 5 mm (the 3 mm floor strip is the thin edge that can lift)
+//   Adhesion          Skirt. The 5 mm brim is part of the model (bracket_printable),
+//                     because Cura cannot leave the brim out at the slot mouths.
 
 // Concave fillet along Y, filling the corner at the origin towards +X and +Z.
 module fillet(r, depth) {
@@ -28,8 +29,10 @@ module fillet(r, depth) {
 // slot_z:     bottom of slot from floor underside; slot_h: slot height
 // slot_depth: how far the slot cuts into the upright, from the inside
 // fillet_r:   inside corner floor/upright, 0 for none; keep below slot_z - base
+function bracket_length(slot_span, wall, slot_depth) = slot_span - 2 * slot_depth + 2 * wall;
+
 module bracket(slot_span, depth, height, base, wall, slot_z, slot_h, slot_depth, fillet_r) {
-    length = slot_span - 2 * slot_depth + 2 * wall;
+    length = bracket_length(slot_span, wall, slot_depth);
     echo(length = length);
     difference() {
         union() {
@@ -47,8 +50,20 @@ module bracket(slot_span, depth, height, base, wall, slot_z, slot_h, slot_depth,
     }
 }
 
-// Same bracket, rotated into print orientation (on its side).
-module bracket_printable(slot_span, depth, height, base, wall, slot_z, slot_h, slot_depth, fillet_r) {
-    rotate([90, 0, 0])
+// Same bracket, rotated into print orientation (on its side), with a one-layer brim
+// that keeps brim_keepout clear around each slot mouth so it cannot fill the slot.
+// brim_w = 0 for no brim.
+module bracket_printable(slot_span, depth, height, base, wall, slot_z, slot_h, slot_depth, fillet_r,
+                         brim_w = 5, brim_keepout = 5, brim_h = 0.2) {
+    module part() rotate([90, 0, 0])
         bracket(slot_span, depth, height, base, wall, slot_z, slot_h, slot_depth, fillet_r);
+    length = bracket_length(slot_span, wall, slot_depth);
+    part();
+    if (brim_w > 0)
+        linear_extrude(brim_h) difference() {
+            offset(r = brim_w) projection(cut = true) translate([0, 0, -0.1]) part();
+            // printed orientation: original z becomes -y
+            for (x = [wall - slot_depth / 2, length - wall + slot_depth / 2])
+                translate([x, -(slot_z + slot_h / 2)]) square(2 * brim_keepout, center = true);
+        }
 }
