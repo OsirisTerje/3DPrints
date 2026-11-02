@@ -7,7 +7,7 @@
 
 | Name | Size W × D × H (mm) | Thumbnail |
 |---|---|---|
-| svb_bracket_small | 80.0 × 24.9 × 10.0 | <img src="svb_bracket_small.png" width="128"> |
+| svb_bracket_small | 84.8 × 24.9 × 10.0 | <img src="svb_bracket_small.png" width="128"> |
 | svb_power_bracket | 81.7 × 24.9 × 20.0 | <img src="svb_power_bracket.png" width="128"> |
 
 ## ballastspreaders

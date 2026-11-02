@@ -29,9 +29,11 @@ module fillet(r, depth) {
 // slot_z:     bottom of slot from floor underside; slot_h: slot height
 // slot_depth: how far the slot cuts into the upright, from the inside
 // fillet_r:   inside corner floor/upright, 0 for none; keep below slot_z - base
+// slot_flare: extra slot height at the slot bottom, tapering to 0 at the mouth. Narrow slots
+//             print as a wedge (the nozzle turn at the closed end overfills it); this compensates.
 function bracket_length(slot_span, wall, slot_depth) = slot_span - 2 * slot_depth + 2 * wall;
 
-module bracket(slot_span, depth, height, base, wall, slot_z, slot_h, slot_depth, fillet_r) {
+module bracket(slot_span, depth, height, base, wall, slot_z, slot_h, slot_depth, fillet_r, slot_flare = 0) {
     length = bracket_length(slot_span, wall, slot_depth);
     echo(length = length);
     difference() {
@@ -45,8 +47,11 @@ module bracket(slot_span, depth, height, base, wall, slot_z, slot_h, slot_depth,
             }
         }
         // slots, cut from the inside face; 0.01 overlap avoids zero-thickness skins
-        for (x = [wall - slot_depth, length - wall - 0.01])
-            translate([x, -1, slot_z]) cube([slot_depth + 0.01, depth + 2, slot_h]);
+        for (m = [0, 1])
+            translate([m * length, 0, 0]) mirror([m, 0, 0])
+                translate([0, depth + 1, 0]) rotate([90, 0, 0]) linear_extrude(depth + 2)
+                    polygon([[wall - slot_depth, slot_z - slot_flare / 2], [wall + 0.01, slot_z],
+                             [wall + 0.01, slot_z + slot_h], [wall - slot_depth, slot_z + slot_h + slot_flare / 2]]);
     }
 }
 
@@ -54,9 +59,9 @@ module bracket(slot_span, depth, height, base, wall, slot_z, slot_h, slot_depth,
 // that keeps brim_keepout clear around each slot mouth so it cannot fill the slot.
 // brim_w = 0 for no brim.
 module bracket_printable(slot_span, depth, height, base, wall, slot_z, slot_h, slot_depth, fillet_r,
-                         brim_w = 5, brim_keepout = 5, brim_h = 0.2) {
+                         slot_flare = 0, brim_w = 5, brim_keepout = 5, brim_h = 0.2) {
     module part() rotate([90, 0, 0])
-        bracket(slot_span, depth, height, base, wall, slot_z, slot_h, slot_depth, fillet_r);
+        bracket(slot_span, depth, height, base, wall, slot_z, slot_h, slot_depth, fillet_r, slot_flare);
     length = bracket_length(slot_span, wall, slot_depth);
     part();
     if (brim_w > 0)

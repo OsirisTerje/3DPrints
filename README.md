@@ -6,12 +6,23 @@ OpenSCAD designs for 3D-printed mounting brackets, plus older STL-only designs.
 
 ## Parts
 
-| Part                    | Source                    | STL                      | Holds                     |
-|-------------------------|---------------------------|--------------------------|---------------------------|
-| SVB power supply bracket | `svb_power_bracket.scad` | `svb_power_bracket.stl`  | 60 mm wide PCB, 1.6 mm thick |
-| SVB bracket, small      | `svb_bracket_small.scad`  | `svb_bracket_small.stl`  | 64.9 mm wide PCB          |
+| Part                     | Source                   | STL                     | Holds                        |
+|--------------------------|--------------------------|-------------------------|------------------------------|
+| SVB power supply bracket | `svb_power_bracket.scad` | `svb_power_bracket.stl` | 60 mm wide PCB, 1.6 mm thick |
+| SVB bracket, small       | `svb_bracket_small.scad` | `svb_bracket_small.stl` | 64 mm wide PCB, 1.1 mm thick |
 
-Both are U-brackets with a slot in each upright for the PCB edge. The shared geometry is in `bracket_lib.scad`; each part file only sets its dimensions.
+Both are U-brackets with a slot in each upright for the PCB edge. The shared geometry is in `bracket_lib.scad`; each part file only sets its dimensions. The power supply bracket is test-printed and fits. The small bracket is being test-printed; its slots taper (`slot_flare`) because narrow slots print as a wedge.
+
+### Fossli LED holder plates
+
+`Fossli/fossli_led_holders.scad` makes two plates, left and right, that hold the 3 mm LEDs of the Fossli control panel from the underside. LED and switch positions come from the panel drawing `Fossli 20260220-2.svg`. Each LED gets a recess for its collar and two leg holes. The plate is cut out around the switch bodies.
+
+| Part              | STL                             |
+|-------------------|---------------------------------|
+| Left side plate   | `fossli_led_holder_left.stl`    |
+| Right side plate  | `fossli_led_holder_right.stl`   |
+
+The STLs are exported upside down, panel side on the bed, for a smooth contact face. Turn the plate over to mount it. Export one plate with `openscad -D 'part="left"' -o left.stl fossli_led_holders.scad`.
 
 ### Older designs (STL only)
 
@@ -42,3 +53,10 @@ The STLs in this repo are exported in print orientation. Re-export them after ch
 ## Printing
 
 Print on its side, as exported, so the layers run across the uprights. Settings tuned for strength are listed in `bracket_lib.scad`, and `BracketStrong.curaprofile` is a matching Ultimaker Cura profile (Ultimaker 3, PLA, 0.2 mm layers).
+
+| Cura profile                | Use                                                                            |
+|-----------------------------|--------------------------------------------------------------------------------|
+| `BracketStrong.curaprofile` | Brackets: 5 walls, 40 % gyroid, hotter, less fan, skirt (brim is in the model) |
+| `FlashAlike2.curaprofile`   | General fast prints: Draft 0.2 mm, 5 mm brim. Base for BracketStrong           |
+
+Import a profile in Cura under Preferences → Configure Cura → Profiles → Import.
