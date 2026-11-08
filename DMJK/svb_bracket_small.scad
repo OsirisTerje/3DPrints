@@ -1,6 +1,6 @@
 // SVB bracket, small. Dimensions from "SVB Bracket small.stl", plus fillets.
 // Print settings: see bracket_lib.scad.
-use <bracket_lib.scad>
+use <../bracket_lib.scad>
 
 slot_span  = 65.7;  // slot bottoms: PCB 64.0 + 1.7 play; 66.7 let the board drop out of one slot
 depth      = 10;

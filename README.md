@@ -6,12 +6,15 @@ OpenSCAD designs for 3D-printed mounting brackets, plus older STL-only designs.
 
 ## Parts
 
-| Part                     | Source                   | STL                     | Holds                        |
-|--------------------------|--------------------------|-------------------------|------------------------------|
-| SVB power supply bracket | `svb_power_bracket.scad` | `svb_power_bracket.stl` | 60 mm wide PCB, 1.6 mm thick |
-| SVB bracket, small       | `svb_bracket_small.scad` | `svb_bracket_small.stl` | 64 mm wide PCB, 1.1 mm thick |
+| Part                     | Source                        | Holds                                        |
+|--------------------------|-------------------------------|----------------------------------------------|
+| SVB power supply bracket | `DMJK/svb_power_bracket.scad` | 60 mm wide PCB, 1.6 mm thick                 |
+| SVB bracket, small       | `DMJK/svb_bracket_small.scad` | 64 mm wide PCB, 1.1 mm thick                 |
+| VallekilenSCB            | `DMJK/VallekilenSCB.scad`     | Larger board piece, L9110, 40/60 power board |
 
-Both are U-brackets with a slot in each upright for the PCB edge. The shared geometry is in `bracket_lib.scad`; each part file only sets its dimensions. The power supply bracket is test-printed and fits. The small bracket is being test-printed; its slots taper (`slot_flare`) because narrow slots print as a wedge.
+Each `.scad` has its exported `.stl` next to it.
+
+The SVB parts are U-brackets with a slot in each upright for the PCB edge. The shared geometry is in `bracket_lib.scad`; each part file only sets its dimensions. The power supply bracket is test-printed and fits. The small bracket is being test-printed; its slots taper (`slot_flare`) because narrow slots print as a wedge.
 
 ### Fossli LED holder plates
 
@@ -40,12 +43,14 @@ Made in Tinkercad and other tools before the move to OpenSCAD. No source files.
 | `ballastspreaders`         | Ballast spreader tools                                |
 | `Bracket for Uno-vertical`, `Powersupplybracket`, `RelayBoardBracket`, `Voltmeter`, `Platting` | Single parts |
 
+Board sizes and hole positions for brackets are in `boards.scad` (40/60, 25/65, Larger board, Arduino Uno, proto shield, L9110).
+
 ## Building
 
 Open a part file in [OpenSCAD](https://openscad.org) (a development snapshot with the Manifold backend is recommended), press F6 to render and F7 to export. From the command line:
 
 ```
-openscad --backend=manifold --export-format binstl -o svb_power_bracket.stl svb_power_bracket.scad
+openscad --backend=manifold --export-format binstl -o DMJK/svb_power_bracket.stl DMJK/svb_power_bracket.scad
 ```
 
 The STLs in this repo are exported in print orientation. Re-export them after changing a `.scad` file.

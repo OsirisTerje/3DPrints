@@ -1,5 +1,5 @@
 // SVB power supply bracket. Print settings: see bracket_lib.scad.
-use <bracket_lib.scad>
+use <../bracket_lib.scad>
 
 slot_span  = 61;    // slot bottoms: PCB 60.0 + 0.5 play + 0.3 lost in print (60.3 printed as 60.0)
 depth      = 20;
