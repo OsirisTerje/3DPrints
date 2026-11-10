@@ -1,6 +1,6 @@
 # 3DPrints catalog
 
-81 models.
+88 models.
 
 
 ## ballastspreaders
@@ -9,6 +9,17 @@
 |---|---|---|
 | larger | 34.3 × 60.0 × 50.0 | <img src="ballastspreaders/larger.png" width="128"> |
 | master | 34.3 × 30.0 × 30.0 | <img src="ballastspreaders/master.png" width="128"> |
+
+## boards (board library in boards.scad, not for printing)
+
+| Name | Size W × D × H (mm) | Thumbnail |
+|---|---|---|
+| arduino_proto_shield | 68.6 × 53.3 × 1.2 | <img src="boards/arduino_proto_shield.png" width="128"> |
+| arduino_uno | 68.6 × 53.3 × 1.6 | <img src="boards/arduino_uno.png" width="128"> |
+| board_25_65 | 65.6 × 25.5 × 1.1 | <img src="boards/board_25_65.png" width="128"> |
+| board_40_60 | 60.0 × 40.0 × 1.3 | <img src="boards/board_40_60.png" width="128"> |
+| l9110_driver | 28.9 × 22.5 × 1.6 | <img src="boards/l9110_driver.png" width="128"> |
+| larger_board | 145.2 × 63.9 × 0.9 | <img src="boards/larger_board.png" width="128"> |
 
 ## Bracket for Uno-vertical
 
@@ -64,6 +75,7 @@
 
 | Name | Size W × D × H (mm) | Thumbnail |
 |---|---|---|
+| ControllerBoard | 182.2 × 90.6 × 16.0 | <img src="DMJK/ControllerBoard.png" width="128"> |
 | svb_bracket_small | 84.8 × 24.9 × 10.0 | <img src="DMJK/svb_bracket_small.png" width="128"> |
 | svb_power_bracket | 81.7 × 24.9 × 20.0 | <img src="DMJK/svb_power_bracket.png" width="128"> |
 | VallekilenSCB | 103.9 × 150.9 × 11.0 | <img src="DMJK/VallekilenSCB.png" width="128"> |

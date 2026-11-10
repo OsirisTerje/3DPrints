@@ -11,6 +11,7 @@ OpenSCAD designs for 3D-printed mounting brackets, plus older STL-only designs.
 | SVB power supply bracket | `DMJK/svb_power_bracket.scad` | 60 mm wide PCB, 1.6 mm thick                 |
 | SVB bracket, small       | `DMJK/svb_bracket_small.scad` | 64 mm wide PCB, 1.1 mm thick                 |
 | VallekilenSCB            | `DMJK/VallekilenSCB.scad`     | Larger board piece, L9110, 40/60 power board |
+| ControllerBoard          | `DMJK/ControllerBoard.scad`   | Arduino Uno, proto shield, 25/65 power board |
 
 Each `.scad` has its exported `.stl` next to it.
 
@@ -43,7 +44,7 @@ Made in Tinkercad and other tools before the move to OpenSCAD. No source files.
 | `ballastspreaders`         | Ballast spreader tools                                |
 | `Bracket for Uno-vertical`, `Powersupplybracket`, `RelayBoardBracket`, `Voltmeter`, `Platting` | Single parts |
 
-Board sizes and hole positions for brackets are in `boards.scad` (40/60, 25/65, Larger board, Arduino Uno, proto shield, L9110).
+Board sizes and hole positions for brackets are in `boards.scad` (40/60, 25/65, Larger board, Arduino Uno, proto shield, L9110). The `boards` section of the catalog shows each one; `make_thumbnails.py` exports them to `boards/`.
 
 ## Building
 

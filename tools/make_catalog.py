@@ -45,7 +45,7 @@ def main() -> None:
         if folder != current:
             if current is not None:
                 sections.append("</table>")
-            title = "(root)" if folder == "." else folder
+            title = {".": "(root)", "boards": "boards (board library in boards.scad, not for printing)"}.get(folder, folder)
             sections.append(f"<h2>{html.escape(title)}</h2>\n<table>"
                             "<tr><th>Name</th><th>Size W × D × H (mm)</th><th>Thumbnail</th></tr>")
             md += ["", f"## {title}", "", "| Name | Size W × D × H (mm) | Thumbnail |", "|---|---|---|"]
