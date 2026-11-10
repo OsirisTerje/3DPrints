@@ -1,4 +1,4 @@
-# Chat log: OpenSCAD brackets, repo setup, Fossli LED plates
+# Chat log: OpenSCAD brackets, repo setup, Fossli LED plates, board library, VallekilenSCB
 
 ## User (2026-10-24 19:26)
 
@@ -1178,5 +1178,793 @@ Some words are still there:
 If you run `save_chatlog.py` again, it rebuilds the log from the transcript and the names come back. The script doesn't redact anything. Nothing is committed.
 
 ## User (2026-11-01 09:31)
+
+save chatlog
+
+## Claude (2026-11-01 09:32)
+
+I saved the chat log again. `chatlogs/2026-10-29-brackets-and-led-plates.md` now has 119 messages, and a search finds no NAS host or path names in it.
+
+Re-running the script no longer brings the names back. It now reads its replacement rules from `tools/chatlog_redact.txt`, which holds the same rules as before. That file is listed in `.gitignore`, so the names stay out of the public repo.
+
+To add a rule, put one line per name in that file: the pattern, a TAB, then the replacement. Re-saving the log later is the same command:
+```
+python tools/save_chatlog.py <transcript.jsonl> chatlogs/2026-10-29-brackets-and-led-plates.md "Chat log: OpenSCAD brackets, repo setup, Fossli LED plates"
+```
+
+The rules file exists only on this machine, so on another PC the script would write the names out in full. Nothing is committed.
+
+## User (2026-11-01 09:32)
+
+commit and push
+
+## Claude (2026-11-01 09:33)
+
+I committed and pushed `401b4ad` to `main` on GitHub. Before committing, I regenerated the thumbnails and the catalog, which now lists 80 models.
+
+The commit contains:
+- **Power bracket:** slot span 61 mm, slot height 2.1 mm, with the brim modelled in the part.
+- **Cura profile:** `BracketStrong` now uses a skirt instead of a brim.
+- **Fossli LED plates:** the new `Fossli/` folder with the `.scad` file and both plate STLs.
+- **Chat log:** `chatlogs/` with the redacted log, and `tools/save_chatlog.py`.
+- `.gitignore`, updated thumbnails and the catalog.
+
+I left out `FlashAlike2.curaprofile`, your own Cura export, because you hadn't said whether you want it in the repo.
+
+The README doesn't mention the Fossli plates yet. Neither the 2.1 mm slots nor the new LED plates have been test-printed.
+
+## User (2026-11-01 09:34)
+
+add the Fossli plates to the readme. and the curaprofile.  I have testprinted, the wider holder works fine, the 10 mm holder I need to adjust, later
+
+## Claude (2026-11-01 09:35)
+
+I updated the README and haven't committed it.
+
+- **Fossli plates:** a new section explains what the two plates are, that the hole positions come from the panel SVG, which STL is which side, and how to export one plate. It also says the plates are printed panel side down and turned over to mount.
+- **Brackets:** the README now says the power supply bracket is test-printed and fits, and that the small (10 mm) bracket still needs adjusting.
+- **Cura profiles:** a table lists both profiles, `BracketStrong` for brackets and `FlashAlike2` for general fast prints, with how to import them in Cura.
+
+`FlashAlike2.curaprofile` is still untracked, so it will go in with the next commit.
+
+The Fossli plates have not been test-printed in their current version, so the README doesn't claim they fit.
+
+## User (2026-11-01 21:35)
+
+Let us look at the 10 mm bracket, and adjust that for shrinking.  It is tight both in width and in slice height.  The thickness of the board is 1.1mm , and the width of board is 64 mm.  Can you adjust this the same way we adjusted the power brakcet board
+
+## Claude (2026-11-01 21:36)
+
+I changed `svb_bracket_small.scad` by the same rules as the power bracket and re-exported the STL. It hasn't been printed yet.
+
+| Value       | Old  | New  | Reason                                                  |
+|-------------|------|------|---------------------------------------------------------|
+| `slot_span` | 64.9 | 65.0 | Board 64.0 + 1.0, the margin that fits on the power bracket |
+| `slot_h`    | 1.2  | 1.6  | Board 1.1 + 0.15 play + 0.35 print shrink               |
+
+Bracket length goes from 70.0 to 70.1 mm. The thumbnail and catalog are updated, and nothing is committed.
+
+- **Slot height was the main problem.** By the shrink we measured, the 1.2 mm slot prints at about 0.85 mm, so a 1.1 mm board cannot go in. That may also have made the width feel tight.
+- **Width changes only 0.1 mm.** With the old 64.9 the slots should have printed about 64.6 apart, which is already 0.6 mm wider than the board. If the width is still tight with the new slots, measure the printed distance between the slot bottoms and I'll set the span from that.
+
+## User (2026-11-01 21:38)
+
+I measure the existing print slot to be 1.0mm height
+
+## Claude (2026-11-01 21:38)
+
+I set the slot height to 1.5 mm and re-exported `svb_bracket_small.stl`. It hasn't been printed yet.
+
+This bracket's slot shrank by 0.2 mm: drawn 1.2, measured 1.0. My 1.6 mm assumed the 0.35 mm shrink from the power bracket, so it would print about 1.4 mm and leave the 1.1 mm board 0.3 mm loose. At 1.5 mm the slot should print about 1.3 mm, which leaves 0.2 mm of play.
+
+The shrink differs between the two brackets: 0.2 mm here and 0.35 mm on the power bracket. If the slot still prints closer to 1.15 mm, the board will be tight again; then set `slot_h` to 1.6.
+
+The slot span stays 65.0. The thumbnail and catalog are updated, and nothing is committed.
+
+## User (2026-11-01 21:38)
+
+Did you also fix the brim so that it doesnt close the slicing
+
+## Claude (2026-11-01 21:39)
+
+Checking the slot openings in the first layer. The first test was muddied by touching faces, so I'm re-running it with a slightly smaller test box.
+
+## Claude (2026-11-01 21:39)
+
+Yes. The small bracket uses the same shared bracket code as the power bracket, so it already had the brim gap, and the re-export kept it.
+
+I checked both brackets after the latest changes. Both slots on each bracket are empty in the first layer and all the way through the part. A control test with a test box reaching past the slot did find material, so the check does catch it.
+
+Each gap is a 10 × 10 mm square centred on the slot opening, so it moves with the slot when the height changes. In Cura, adhesion must be set to Skirt, as in `BracketStrong`. If Cura adds its own brim, that brim will cover the slots again.
+
+## User (2026-11-01 21:40)
+
+I am also a bit concerned about the width, you adjusted it only 0.1 mm, and it seems to me to be tight on the existing prints
+
+## Claude (2026-11-01 21:40)
+
+I raised the width only 0.1 mm because the numbers say it shouldn't be tight. I can't explain your tight fit without a measurement.
+
+- **Power bracket:** the slots printed 0.3 mm narrower than designed (60.3 drawn, 60.0 measured). At 61 mm it fits.
+- **Small bracket:** the old print was drawn at 64.9 mm. With the same 0.3 mm loss it would print about 64.6, which is 0.6 mm wider than the 64 mm board, so it shouldn't feel tight.
+
+It could still feel tight for three reasons:
+1. The slot height was the real block. At 1.0 mm high, a 1.1 mm board can't sit in the slot, so it catches at the slot opening and that feels like a width problem. The new 1.5 mm slot fixes this.
+2. This print lost more than 0.3 mm in width.
+3. The board is wider than 64.0 mm, or wider at the edge that goes into the slots.
+
+To tell these apart, measure on the existing print the distance between the slot bottoms, with the inside jaws of the caliper inside the slots. Also measure the board width at the edges that go into the slots. I'll set the span from those two numbers.
+
+If you'd rather not measure, set the span to 65.5. That gives at least 0.9 mm of play with the shrink we've seen. The bracket will be a bit loose, but it can't be tight.
+
+## User (2026-11-01 21:44)
+
+From the bottom of the slots, I measure around 64 mm, and maybe a little bit less, so I can press the board in, but it bends the print a little.
+
+## Claude (2026-11-01 21:45)
+
+I set the small bracket's slot span to 65.7 mm and re-exported the STL. The bracket is now 70.8 mm long. The thumbnail and catalog are updated, and nothing is committed or printed.
+
+You were right about the width. This print lost about 0.9–1.0 mm (64.9 drawn, about 64.0 measured), three times the 0.3 mm the power bracket lost. At 65.7 mm the slots should print about 64.7 apart, the same 0.7 mm of play the power bracket has.
+
+I don't know why this bracket loses so much more. A likely cause is the uprights leaning inward, because they are thinner here (5 mm against 7.64 mm). To check, measure the outside length of the old print, which was drawn at 70.0 mm.
+- If it is about 70, the uprights lean inward. Making them thicker is the better fix.
+- If it is about 69, the whole part shrinks, and 65.7 is the right fix.
+
+## User (2026-11-01 21:45)
+
+Hav you curved them in the inside corner, like the other brakcet
+
+## Claude (2026-11-01 21:45)
+
+Yes. The small bracket has the same 3 mm curved fillet in both inside corners as the power bracket, set by `fillet_r = 3` in `svb_bracket_small.scad`.
+
+The fillet ends 2.3 mm below the slot, so it doesn't reach the board. The slot starts 8.3 mm up and the floor is 3 mm, which leaves 5.3 mm for the 3 mm fillet.
+
+The fillets were added when the Tinkercad design was converted to OpenSCAD. If your existing print came from the old Tinkercad STL, it has no fillets.
+
+## User (2026-11-01 21:46)
+
+ok, then I think we try a print and see how it looks
+
+## Claude (2026-11-01 21:46)
+
+`svb_bracket_small.stl` is exported and ready to print.
+
+In Cura, use the `BracketStrong` profile and check that adhesion is set to Skirt. The bracket already lies on its side and has its own brim.
+
+Measure two things on the print:
+- **Slot bottom to slot bottom.** It should be about 64.7 mm.
+- **Outside length.** It is drawn at 70.8 mm. If it comes out close to 70.8 while the slots still come out narrow, the uprights are leaning inward.
+
+The slot height should come out at about 1.3 mm.
+
+## User (2026-11-01 22:11)
+
+is the __pychache__part of gitignore ?
+
+## Claude (2026-11-01 22:11)
+
+`__pycache__` wasn't in `.gitignore`. I've added `__pycache__/` now, and `git status` no longer lists the folder.
+
+It was never committed. It showed up as `tools/__pycache__` when my bracket check imported `make_catalog.py`. You can delete the folder if you like; Python recreates it when needed.
+
+## User (2026-11-01 23:03)
+
+a 1.3 mm blade does not go in, it seems the slot is less height further in.  I have a 1.25 mm wire, it doesnt go in.  THe board is really cramped.  It looks a bit like the slot is a wedge-form
+
+## Claude (2026-11-01 23:04)
+
+The wedge is probably the slicer, not the model. The model's slot is a plain rectangle with the same height all the way in. On its side, the slot prints as a narrow notch in every layer. At the closed end, the nozzle makes a tight U-turn and squeezes extra plastic into the corners, so the slot narrows towards the bottom. That would explain both symptoms:
+- The 1.3 mm blade and 1.25 mm wire stop partway in.
+- The board feels too wide, because the bottom of the slot is partly filled. That is probably also why the old print measured 0.9 mm short.
+
+The power bracket's slot is wider (2.1 mm), so there the extra plastic doesn't close it.
+
+Fix: make the slot taller at the bottom than at the opening, to make up for the plastic that collects there. I'll add this as an option in the shared bracket code; it stays off for the power bracket.
+
+## Claude (2026-11-01 23:05)
+
+I've made the small bracket's slots taller at the bottom and re-exported `svb_bracket_small.stl`. Measured on the model, each slot is now 1.5 mm high at the opening and 1.9 mm at the bottom, on both sides.
+
+This is a new `slot_flare` setting in `bracket_lib.scad`, the extra height at the bottom of the slot. The small bracket uses `slot_flare = 0.4`. The setting is 0 by default, so the power bracket is not affected: I re-exported it and its STL is identical to before. The brim gap still covers the wider slot bottom.
+
+The cause is my best explanation, not a confirmed one. Two other things to know:
+- **The flare amount is a guess.** If the board still sticks partway in, raise `slot_flare` to 0.6. If the opening is too tight, raise `slot_h` instead.
+- **Measure the width again on this print.** If the bottoms of the old slots were filled in, the 64.0 mm you measured was too low, and 65.7 may now be loose.
+
+The thumbnail and catalog are updated, and nothing is committed.
+
+Someone added a full Python template to `.gitignore`. It already covers `__pycache__/`, so the line I added is now a duplicate. It does no harm, but I can remove it.
+
+## User (2026-11-01 23:11)
+
+I had a measurement around 64.5 mm, but it is hard to repeat, the slot is more narrow in the bottom than my measurement tool. And we need to add extra width overall, so that the vertical sides doesnt get too tick, they can break at slot level. So add a couple of mm on both sides of this one. I have enough space. In fact increase the slot deabth with 0.5 mm in both ends, to be sure this works
+
+## Claude (2026-11-01 23:12)
+
+I've made the uprights thicker and the slots deeper on the small bracket, and re-exported `svb_bracket_small.stl`. The bracket is now 74.8 mm long, up from 70.8. The thumbnail and catalog are updated, and nothing is committed.
+
+| Value                    | Old  | New  |
+|--------------------------|------|------|
+| Upright thickness        | 5    | 7    |
+| Slot depth               | 2.45 | 2.95 |
+| Slot bottom to bottom    | 65.7 | 66.7 |
+| Behind each slot         | 2.55 | 4.05 |
+
+Each upright is 2 mm thicker, so there is 4.05 mm of material behind each slot. Each slot goes 0.5 mm deeper into its upright, and the gap between the uprights' inside faces is still 60.8 mm.
+
+There is a tradeoff on how far the board reaches into the slots:
+- **Centred:** the 64 mm board goes 1.6 mm into each slot and has 1.35 mm free at each slot bottom.
+- **Pushed against one slot bottom:** the other edge is only about 0.25 mm in its slot. With print shrink it is more like 0.5 mm. That can let the board slip out.
+
+If that is too little, keep the deeper slots but use a slot span of 65.7. The board would then go 2.1 mm into each slot and still have 0.85 mm free at the bottoms.
+
+## User (2026-11-02 16:07)
+
+ok, I need to use a little "fil" to make the slot ok, but now it is too big, It can be a tad smaller, and also reduce the depth again, the total width as you said make the board drop out of one of the slots.
+
+## Claude (2026-11-02 16:07)
+
+I've put the slot depth back to 2.45 and narrowed the slot span to 65.7 mm. That is the option I gave last time. The uprights stay 7 mm thick, and the bracket is still 74.8 mm long. The STL, thumbnail and catalog are updated, and nothing is committed.
+
+| Value                 | Last print | Now  |
+|-----------------------|------------|------|
+| Slot bottom to bottom | 66.7       | 65.7 |
+| Slot depth            | 2.95       | 2.45 |
+| Slot height (opening) | 1.5        | 1.7  |
+| Slot height (bottom)  | 1.9        | 2.1  |
+
+- **Board in the slots:** centred, the board goes 1.6 mm into each slot. Pushed fully to one side, the other edge still goes about 0.75 mm in, up from 0.25. Print shrink makes that a bit more.
+- **Slot height:** I raised it 0.2 mm because you had to file the slots. I don't know how much you filed off. If the new slots are loose, go back to 1.6.
+
+## User (2026-11-02 16:08)
+
+dont make it that high, it needs to be a tad more narrow.  It is uneven, I will use a "fil" to smooth it out
+
+## Claude (2026-11-02 16:08)
+
+I set the slot height to 1.4 mm, 0.1 mm lower than the 1.5 mm you printed, and re-exported the STL. The bottom of each slot is now 1.8 mm high. Nothing is committed.
+
+Everything else is as in my last message: slot bottoms 65.7 mm apart, slots 2.45 mm deep, uprights 7 mm.
+
+If the opening fits but the bottom of the slot is still loose, lower `slot_flare` from 0.4 to 0.2 instead of making the whole slot lower.
+
+## User (2026-11-02 16:09)
+
+ok, you made the stl file ?
+
+## Claude (2026-11-02 16:09)
+
+Yes. `D:\3DPrints\svb_bracket_small.stl` was exported at 17:08, the same minute as the `.scad` change, so it has the 1.4 mm slots.
+
+If Cura still has the old file open, reload it with File → Reload All Models.
+
+## User (2026-11-02 16:10)
+
+commit and push
+
+## Claude (2026-11-02 16:10)
+
+I committed and pushed `b97289d` to `main`, and nothing is left uncommitted.
+
+The commit contains:
+- **Small bracket:** 7 mm uprights, slot bottoms 65.7 mm apart, slots 1.4 mm high with 0.4 mm extra height at the bottom.
+- **Shared bracket code:** the new `slot_flare` setting. It is off by default, so the power bracket is unchanged.
+- **README:** the Fossli plates section, both Cura profiles, and the small bracket now listed for a 64 mm wide, 1.1 mm thick board. Before committing, I also fixed the README's old "64.9 mm" board width.
+- **Cura profile:** `FlashAlike2.curaprofile` is now in the repo.
+- **`.gitignore`:** the Python template. I removed my extra `__pycache__/` line because the template already has it.
+
+The README now says the small bracket is being test-printed. Update it once the 1.4 mm print fits.
+
+## User (2026-11-05 09:27)
+
+what is the url to the repo
+
+## Claude (2026-11-05 09:27)
+
+The repo is at https://github.com/OsirisTerje/3DPrints
+
+## User (2026-11-05 09:29)
+
+The I2C connectorboard, is that ready to be printed now, or does it require any changes
+
+## Claude (2026-11-05 09:29)
+
+The I2C connector board (`DualSignalBox/I2C-ConnectorBoard.stl`) can print as it is: both parts sit flat on the bed and need no supports. Whether it fits your board, I can't tell: it is an old Tinkercad STL with no source file, and I don't know the board it holds.
+
+The file holds two separate parts:
+
+| Part    | Size (W × L × H)     | Features                                                                                |
+|---------|----------------------|-----------------------------------------------------------------------------------------|
+| Base    | 10 × 56.5 × 3 mm     | 5 holes, about 3–4 mm. Two raised blocks, 10 × 18 mm and up to 7.4 mm high, each with a 4 mm hole |
+| Clamp   | 10 × 46 × 2 mm       | 2 holes of 3 mm                                                                         |
+
+The clamp's two holes line up with the holes in the base's blocks, 36 mm apart. So the clamp probably screws onto the blocks and holds the board, or its cable, between them.
+
+Two things are worth checking against your board and screws:
+- **Hole sizes.** Small holes print about 0.4 mm undersize. A 3 mm hole comes out about 2.6 mm, which works for a self-tapping screw but is tight for an M3 bolt. A 4 mm hole comes out about 3.6 mm, which is clearance for M3.
+- **Clamp gap.** The space between the clamp and the base is set by the block height. Your board or connector has to fit that gap.
+
+If you printed this part before and it fit, print it again unchanged. If you want changes, give me the board's dimensions and the screw size, and I'll redo it as a `.scad` file.
+
+## User (2026-11-08 19:23)
+
+I have some different veroboards or prototypeboards I need to create 3d printed brackets for.  I would like to add these to a scad library, so that I can just reuse them for the next printed bracket.   The first is a 40x60 cm protoboard, links: https://www.ebay.co.uk/itm/191754521464  and https://prisradar.no/produkter/prototypekort-dobbeltsidig-40x60mm-pcb-2-54mm-raster-2  .  I need you to store the board with the measurements for the holes and the size of the board. The holes are 2.2 mm. The seem to be 1 mm from the short edge on one side, and 0.5 mm from the short edge on the other side, and 0.7 to 0.8 mm from the long edges.
+
+## Claude (2026-11-08 19:24)
+
+I added the 40/60 board to a new library file, `D:\3DPrints\boards.scad`, under the name `board_40_60()`. The 3D model of the board renders correctly with 4 holes.
+
+| Value                    | Stored                                    |
+|--------------------------|-------------------------------------------|
+| Size                     | 60 × 40 mm                                |
+| Hole diameter            | 2.2 mm                                    |
+| Hole centres along 60 mm | 2.1 and 58.4 (56.3 apart)                 |
+| Hole centres along 40 mm | 1.85 and 38.15 (36.3 apart)               |
+| Thickness                | 1.6 mm, not measured                      |
+
+The corner where (0, 0) starts is at the end with the 1.0 mm margin.
+
+I read your margins as the gap from the hole's edge to the board's edge, not to the hole's centre. A hole centre 0.5 mm from the edge would cut through the edge of a 2.2 mm hole. For the long edges I used 0.75 mm, the middle of your 0.7–0.8.
+
+To use the board in a bracket file:
+```
+use <boards.scad>
+b = board_40_60();
+%board(b);   // see-through board in preview, to line it up against the bracket
+```
+
+The names I added:
+- `board_40_60()` for the board itself.
+- `board_length`, `board_width`, `board_thickness`, `board_hole_d` and `board_holes` to read its values.
+- `board()` to draw the board.
+
+Before building a bracket from these numbers, check two things with calipers:
+1. **Hole spacing.** Measure centre to centre, or outer hole edge to outer hole edge. Margins measured to the board edge can be 0.2–0.3 mm off.
+2. **Thickness.** It sets the slot height if a bracket holds the board in slots.
+
+I didn't open the eBay or prisradar pages. The numbers come only from your measurements, and nothing is committed.
+
+## User (2026-11-08 19:28)
+
+the thichness is 1.3 mm but speficied as 1.6mm, doesnt really matter though, it is called "Double Side Prototype PCB Bread board Tinned Universal 40x60 mm FR4".
+
+## Claude (2026-11-08 19:29)
+
+I set the 40/60 board's thickness to the measured 1.3 mm and added its full product name to the comment in `boards.scad`. The comment also notes that it is sold as 1.6 mm. The board model still renders with 4 holes.
+
+The thickness only matters if a bracket holds the board in slots, and then 1.3 mm is the value the slot needs. Nothing is committed.
+
+## User (2026-11-08 19:31)
+
+2nd board is 25.5 mm x 65.6 mm, and have a raster of 2.54 mm, no mouinting holes, so I will drill in one of the rasters.  There are 9 rows and 25 columns.  I will specify which rasters where i will drill holed, of it want to use a slot-holding branket for it.
+
+## Claude (2026-11-08 19:32)
+
+I added the second board to `boards.scad` as `board_25_65()`, the "25/65 board". The board model renders correctly, and the 40/60 board is unchanged.
+
+| Value         | Stored                                         |
+|---------------|------------------------------------------------|
+| Size          | 65.6 × 25.5 mm                                 |
+| Thickness     | 1.1 mm, measured                               |
+| Grid          | 2.54 mm pitch, 25 columns × 9 rows             |
+| First hole    | (2.32, 2.59), column 1, row 1                  |
+| Last hole     | (63.28, 22.91), column 25, row 9               |
+| Mounting holes | none yet                                       |
+
+To find where to drill, `board_raster_xy(b, column, row)` gives the hole centre. Columns count from 1 to 25 along the 65.6 mm edge, and rows from 1 to 9 along the 25.5 mm edge. A column or row outside the grid stops the render with an error.
+
+When you tell me which grid holes you'll drill, I'll store them as the board's mounting holes. For a bracket that holds the board in slots, the drill holes don't matter: the board's width and its 1.1 mm thickness are enough.
+
+I assumed the grid is centred on the board, which puts 2.32 mm between the first and last holes and the short edges. Check that with calipers before you drill. Nothing is committed.
+
+## User (2026-11-08 19:37)
+
+The next board is a larger board, which I often break up into smaller parts, it also has no mounting holes, and we have made slot-brackets for this recently.  Any holes will be drilled in the rasters. The boards measures 63.9 x 145.2.  When it is broken up, it always keeps its width (63.9).  It has a raster of 24x56. The short side has markers A-X.  Name it as Larger board.
+
+## Claude (2026-11-08 19:38)
+
+I added the Larger board to `boards.scad` as `larger_board()`, 145.2 × 63.9 mm and 0.86 mm thick. The 40/60 and 25/65 boards still render correctly.
+
+| Value       | Stored                                                          |
+|-------------|-----------------------------------------------------------------|
+| Size        | 145.2 × 63.9 mm (a piece keeps the 63.9 width)                  |
+| Thickness   | 0.86 mm                                                         |
+| Grid        | 2.54 mm pitch, 56 columns along the long edge × 24 rows (A–X)   |
+| Hole A1     | (2.75, 2.74)                                                    |
+| Hole X56    | (142.45, 61.16)                                                 |
+
+The grid is centred on the board in both directions, and your measurements match that to 0.01 mm.
+
+- **Row letters:** `raster_row("C")` turns a row letter into its number, so a hole is `board_raster_xy(b, 12, raster_row("C"))`.
+- **Pieces:** `larger_board(20)` is a piece 20 columns long, which works out to 52.28 mm. It assumes the piece keeps one original board end and was broken halfway between two columns at the other end. A piece from the middle has two broken ends and is about 1.5 mm shorter.
+
+The new names are `larger_board()` and `raster_row()`.
+
+**This may affect the small bracket.** I sized `svb_bracket_small` for a board 64 mm wide and 1.1 mm thick. That width matches the Larger board, but this board is 0.86 mm thick. If this is the board it holds, its 1.4 mm slot (1.8 mm at the bottom) leaves about 0.5 mm of play. Is this the small bracket's board? If yes, I'll lower the slot. Nothing is committed.
+
+## User (2026-11-08 19:40)
+
+Can you find the exact measurements for an Arduino Uno board (Geekcreit), but I think all are the same
+
+## Claude (2026-11-08 19:41)
+
+Found Arduino's official Uno Rev3 design files. Reading the hole positions straight from the board file.
+
+## Claude (2026-11-08 19:41)
+
+I found the exact Uno R3 measurements in Arduino's official board design file and added the board to `boards.scad` as `arduino_uno()`. It renders correctly with 4 holes, and the other boards still render.
+
+| Value         | Value                                                     |
+|---------------|-----------------------------------------------------------|
+| Size          | 68.58 × 53.34 mm (2.7 × 2.1 inches)                        |
+| Hole diameter | 3.2 mm (for M3)                                           |
+| Holes (x, y)  | (13.97, 2.54), (15.24, 50.8), (66.04, 7.62), (66.04, 35.56) |
+| Thickness     | 1.6 mm, the standard; the file doesn't give it            |
+
+The origin is the corner below the power jack, and the USB and power jack are on the x = 0 edge. Clones like Geekcreit copy this layout, since Uno shields have to fit.
+
+Three things matter for a bracket:
+- **The USB connector sticks out 6.3 mm past the board edge**, and the power jack 1.8 mm. A bracket wall on that side needs a cut-out, or has to stay clear.
+- **The corners on the edge opposite the USB are cut off at an angle.** The full 68.58 mm length runs only from y = 5.08 to y = 37.85. A slot along that edge has to sit inside that range.
+- **One hole is a tight fit for a standoff.** The hole at (66.04, 7.62) sits right next to that cut-off corner, so a standoff there must be small.
+
+`board()` still draws the Uno as a plain rectangle without the cut corners. That's fine for lining it up in preview, not for exact fit checks. I didn't check a Geekcreit board itself, so measure one hole spacing on yours to confirm. Nothing is committed.
+
+Sources:
+- Arduino's Uno Rev3 board design file, which the numbers come from: [arduino_Uno_Rev3-02-TH.zip](https://www.arduino.cc/en/uploads/Main/arduino_Uno_Rev3-02-TH.zip)
+- Pages from my searches that confirm only the board size and the hole diameter:
+  - [Arduino UNO R3 Product Reference Manual](https://manuals.plus/m/17b34803656c5983e3cc751b03716cd99809c532d33a0900a41a66ace0124988)
+  - [Arduino Forum: uno dimensions](https://forum.arduino.cc/t/uno-dimensions/378205)
+  - [Adafruit: Arduino Prototyping Mounting Plate](https://learn.adafruit.com/arduino-prototyping-mounting-plate.md?view=all)
+
+## User (2026-11-08 19:47)
+
+Then I have a proto board R3, which is meant to be placed on top of the arduino.  It has 3 holes.  I assume these holes match the arduino R3 boards holes , The boards I have have the two holes at the opposite end of the USB, then one hole at the right side, thickness 1.23 mm
+
+## Claude (2026-11-08 19:47)
+
+I added the proto shield to `boards.scad` as `arduino_proto_shield()`: 1.23 mm thick, with 3 of the Uno's holes. It renders correctly, but one hole is a guess.
+
+| Hole          | Position        | Source                                          |
+|---------------|-----------------|-------------------------------------------------|
+| Away from USB | (66.04, 7.62)   | Uno hole, matches your description              |
+| Away from USB | (66.04, 35.56)  | Uno hole, matches your description              |
+| USB end       | (15.24, 50.8)   | **My guess**, beside the digital pin header     |
+
+The Uno has two holes at the USB end, so "right side" could mean either one:
+- (15.24, 50.8): beside the digital pin header (pins 0–13), near the USB connector. I stored this one.
+- (13.97, 2.54): beside the power and analog header, next to the power jack.
+
+On your proto board, is the single hole next to the digital pins or next to the power pins? If it's the power side, I'll swap it.
+
+I also assumed the shield is the same size as the Uno (68.58 × 53.34). If yours is smaller, give me the size. Nothing is committed.
+
+## User (2026-11-08 19:49)
+
+where are the 0,0 ?
+
+## Claude (2026-11-08 19:49)
+
+Point (0, 0) is the board corner closest to the power jack. Lay the Uno components up, with the USB and power jack pointing left; (0, 0) is then the bottom left corner.
+
+```
+ y=53.34  +--------------------------------------------+
+          |  o (15.24, 50.8)  digital header 0-13      \   cut-off corners
+    USB ==|                                o (66.04, 35.56)
+          |                                            |
+  power ==|                                o (66.04, 7.62)
+   jack   |  o (13.97, 2.54)  power/analog header      /
+ (0,0)    +--------------------------------------------+  x=68.58
+```
+
+- x runs to the right along the 68.58 mm edge.
+- y runs upward along the 53.34 mm edge.
+- The power jack is at the bottom left (y 3.3–12.3), and the USB above it (y 32–44).
+- The digital header (pins 0–13) runs along the top edge, and the power/analog header along the bottom edge.
+
+So the proto shield question is whether its single left-end hole is top left (beside the digital header, what I stored) or bottom left (beside the power header).
+
+## User (2026-11-08 19:51)
+
+nice drawing, add that as a comment in the file .  Show me the same for the arduino board
+
+## Claude (2026-11-08 19:51)
+
+I added the drawing as a comment above `arduino_uno()` in `boards.scad`. Both boards still render.
+
+The drawing I showed you was the Arduino Uno itself. Here is the same view for the proto shield, which I also added as a comment above `arduino_proto_shield()`:
+
+```
+ y=53.34  +--------------------------------------------+
+          |  o (15.24, 50.8)  digital header 0-13      |
+    USB   |                                o (66.04, 35.56)
+  (Uno)   |                                            |
+          |                                o (66.04, 7.62)
+          |                   power/analog header      |
+ (0,0)    +--------------------------------------------+  x=68.58
+```
+
+It uses the same (0, 0) and directions as the Uno, so the two line up when stacked. The USB label shows where the Uno's USB connector is underneath. The shield has no hole at the bottom left.
+
+The top left hole is still my guess. I drew the right-hand corners square because I don't know whether your shield has the Uno's cut-off corners. Nothing is committed.
+
+## User (2026-11-08 19:52)
+
+Then the upper side hole is exactly where the arduino hole is, which I would say is not a guess, but as I asked, aligned with the Arduino. THis is perfect
+
+## Claude (2026-11-08 19:52)
+
+Good, so all three proto shield holes are confirmed. The file needs no change: its comment already places the third hole next to the digital header, with no guess noted.
+
+The one open item is the shield's outline, which I took to be the same as the Uno's (68.58 × 53.34). The comment in the file still says so.
+
+The library now has five boards: 40/60, 25/65, Larger board, Arduino Uno and proto shield. None of it is committed.
+
+## User (2026-11-08 19:54)
+
+The next is a board for the L9110 dual Motor Driver board, as in https://sumozade.com/l9110-dual-motor-driver-board.  Can you find the hole placements for this one ?
+
+## Claude (2026-11-08 19:54)
+
+I couldn't find the hole positions for the L9110 board. No source gives them, and as you say there are several versions, which don't even agree on board size:
+
+| Source                     | Board size        | Holes                  |
+|----------------------------|-------------------|------------------------|
+| sumozade (your link)       | 31 × 22 mm        | not given              |
+| several sellers            | 28 × 21 mm        | 3 mm, spacing not given |
+| others                     | 29 × 23 mm        | M2, 4 corners          |
+
+I haven't added it to `boards.scad`, because none of these numbers is safe to build a bracket on. Measure yours with calipers and I'll add it the same way as the 40/60 board:
+1. Board length and width.
+2. Thickness.
+3. Hole diameter, and how many holes there are.
+4. For each hole, the gap from the hole's edge to the two nearest board edges.
+
+If you also tell me which side the screw terminals and the pin header are on, I'll draw it like the Uno.
+
+Sources:
+- [sumozade: L9110 dual motor driver board](https://sumozade.com/l9110-dual-motor-driver-board)
+- [robu.in: L9110S DC Stepper Motor Driver Board](https://robu.in/?p=75496)
+- [ifuturetech: L9110S Dual Channel DC Motor Driver Module](https://ifuturetech.org/product/l9110s-dual-channel-dc-motor-driver-module)
+- [vxb.com: five pack L9110S H-bridge motor driver module](https://vxb.com/products/five-pack-l9110s-h-bridge-motor-driver-module-for)
+- [makerlab-electronics: L9110S Dual-Channel H-Bridge Motor Driver Module](https://makerlab-electronics.com/products/l9110s-dual-channel-h-bridge-motor-driver-module)
+
+## User (2026-11-08 19:58)
+
+22.5 x 28.9 , thickness 1.65 mm, hole diameter 2.5 mm, with the measurement caliper I measure 20.6-20.7 mm between the outer edges of the holes width-wise, and length wise I measure same way 15.9-16.1 mm
+
+## Claude (2026-11-08 19:58)
+
+I added the L9110 board to `boards.scad` as `l9110_driver()`: 28.9 × 22.5 × 1.65 mm, with four 2.5 mm holes. It renders correctly, but where the holes sit along the length is an assumption.
+
+| Value              | Value                                                       |
+|--------------------|-------------------------------------------------------------|
+| Hole centre spacing | 13.5 mm along the length, 18.15 mm across the width         |
+| Holes (x, y)       | (7.7, 2.175), (7.7, 20.325), (21.2, 2.175), (21.2, 20.325)  |
+
+I got the centre spacing by taking one hole diameter off each of your outer-edge measurements: 16.0 − 2.5 and 20.65 − 2.5. Across the width, the holes leave about 0.9 mm between the hole edge and each board edge.
+
+The holes span only 16 mm of the 28.9 mm length, so they aren't at the corners. I placed them in the middle of the length, which leaves 6.45 mm at each end. To pin that down, measure from one short edge to the nearest hole edge, and tell me which end you measured from: the screw terminal end or the pin header end. I'll fix the positions and draw the board like the Uno.
+
+I assumed 4 holes, one at each corner of that 13.5 × 18.15 rectangle. Nothing is committed.
+
+## User (2026-11-08 19:59)
+
+Seems rather correct yes
+
+## Claude (2026-11-08 20:00)
+
+The L9110 holes are now marked in `boards.scad` as checked on the real board, not assumed. The positions stay as they were.
+
+The library now has six boards: 40/60, 25/65, Larger board, Arduino Uno, proto shield and L9110. None of it is committed.
+
+## User (2026-11-08 20:09)
+
+Now I would like a new board, based on the Small Motorboards, so please convert that to scad format. CAll this board VallekilenSCB, and it should be under the DMJK folder.  It should have a Larger board mounted in the lower left corner, cut down at row 17.  I have 2 holes in it at B2, and X2, and will add same holes at B15 and X15.  Towards the upper left, the L9110 board wil be mounted. There are some mounting stands for it now, but please check the measuements, I dont think it is correct - I remember I only could fasten it with 2 screws.  Then upper right I need a power board, based on the 40x60 mm board.  Ensure the boards have ears for fastening it to a bjelke. I added a square hole in the middle to avoid wasting too much material.  I think the thickness is fine, and also the height of the stands
+
+## Claude (2026-11-08 20:19)
+
+Hi TJ, VallekilenSCB is done: `DMJK/VallekilenSCB.scad` and its STL, ready for a test print. The plate is 83.9 × 138.9 mm plus the ears, and the export rendered without errors.
+
+**Why the L9110 only took 2 screws:** the old stands were 18.0 × 13.2 mm apart, but your board's holes are 18.15 × 13.5. That 0.3 mm error with 2.5 mm holes is enough to stop two of the screws. The new stands use the measured spacing from `boards.scad`.
+
+| Board                | Place       | Stands                            | Screw hole in stand |
+|----------------------|-------------|-----------------------------------|---------------------|
+| Larger board, cut at 17 | lower left | B2, X2, B15, X15; 6 mm high       | 3.0 (M3)            |
+| L9110                | upper left  | 4 holes; 7 mm high                | 2.5                 |
+| 40/60 power board    | upper right | 4 corner holes, board upright; 7 mm high | 2.2          |
+
+- **Plate and stands:** 4 mm plate, 8 mm stands, and the same stand heights as the old plate. The stand holes don't go through the plate.
+- **Ears:** two tabs at the top corners and the round ear on the right side, all with 3 mm holes, the same as the old plate.
+- **Cut-outs:** one square hole under the Larger board and one under the power board, each with 5 mm of plate around the stands.
+- **Preview:** the boards appear see-through in F5, so you can check the fit.
+
+Check these before printing:
+1. **Larger board orientation.** I placed the piece with its 63.9 mm edge running up the plate and row A at the bottom. The kept original end, column 1, is on the left.
+2. **Empty corner.** The lower right corner, about 39 × 69 mm, has no board on it. I can cut it away or make it a large cut-out.
+3. **Old plate holes.** The old plate had 6 extra 3 mm holes. I left them out because I don't know what they were for.
+4. **Round ear height.** The round ear sits at 30 % of the plate height, as on the old plate. The bjelke may need it somewhere else.
+5. **Stand hole sizes.** These are my picks: pilot holes for self-tapping screws.
+
+You had moved the SVB brackets into `DMJK/`, which broke their link to the shared bracket code. I fixed the paths, and both STLs export identical to before. I also updated the README for the new paths, VallekilenSCB and `boards.scad`. Nothing is committed.
+
+## User (2026-11-08 20:21)
+
+I dont see any Section for DMJK in the catalog, please create that and ensure the boards we now have is there
+
+## Claude (2026-11-08 20:22)
+
+The DMJK section is already in the catalog on your disk: `catalog.md` line 63, with all three models.
+
+| Model             | Size (mm)            |
+|-------------------|----------------------|
+| svb_bracket_small | 84.8 × 24.9 × 10.0   |
+| svb_power_bracket | 81.7 × 24.9 × 20.0   |
+| VallekilenSCB     | 93.9 × 150.9 × 11.0  |
+
+You probably looked at the catalog on GitHub. Nothing has been pushed since the brackets moved to `DMJK/` and VallekilenSCB was added, so GitHub still shows the old version. If you had `catalog.html` open in a browser, reload it. Say "commit and push" and it will show on GitHub.
+
+The catalog only lists STL files. The boards in `boards.scad` (40/60, 25/65, Larger board, Uno, proto shield, L9110) are measurements, not printable models, so they aren't in it. If you want them in the catalog, I can add a section listing each board with its size and hole positions.
+
+## User (2026-11-08 20:23)
+
+How much space is there between the upper side of the first board and the lower side of the upper right board
+
+## Claude (2026-11-08 20:23)
+
+The gap is 5 mm. The Larger board's top edge is at y = 68.9, and the power board's bottom edge is at y = 73.9.
+
+The two boards only overlap side by side between x = 38.9 and 49.66. The rest of the power board sits above empty plate.
+
+- **Stands:** the Larger board's top right stand and the power board's bottom left stand are 1.8 mm apart, edge to edge.
+- **Heights:** the boards are at different heights. The Larger board sits 6 mm above the plate and the power board 7 mm, so their faces are 1 mm apart in height.
+
+To widen the gap, change `gap` in `VallekilenSCB.scad`. The plate grows by the same amount in length, because the same value also sets the gap between the L9110 and the power board.
+
+## User (2026-11-08 20:23)
+
+why is the stands at different heights?  Just curious, it doesnt really matter to me
+
+## Claude (2026-11-08 20:23)
+
+The heights are copied from your old Small Motorboards plate. On that plate the stands for the lower board were 6 mm high, and the stands for the three L9110 boards were 7 mm high.
+
+I kept 6 mm for the Larger board, which took the lower board's place, and 7 mm for the L9110. The power board is new, so I gave it 7 mm like the other top board.
+
+I don't know why the old plate used two heights. One possibility is room underneath for solder joints or a component on the L9110. To make them all the same, set `larger_h` to 7 in `VallekilenSCB.scad`.
+
+## User (2026-11-08 20:24)
+
+please set the height the same for all. Can be easier wrt to screws.  Is the inner hole diameter in the stands the same ?
+
+## Claude (2026-11-08 20:25)
+
+All stands are now 7 mm high, set by a single `stand_h` value in `VallekilenSCB.scad`. The STL, thumbnail and catalog are updated.
+
+The holes in the stands are not the same size. Each one matches its board's hole:
+
+| Board        | Board hole     | Hole in stand  | Screw that fits       |
+|--------------|----------------|----------------|-----------------------|
+| Larger board | drilled by you | 3.0            | M3 self-tapping       |
+| L9110        | 2.5            | 2.5            | M2.5 self-tapping     |
+| 40/60 power  | 2.2            | 2.2            | M2 self-tapping       |
+
+The 40/60 board's 2.2 mm holes are the limit: only M2 fits through them. To use one screw size everywhere, use M2 on all boards, drill 2.2 mm holes in the Larger board, and I'll set all stand holes to 2.2. M2 holds fine in 7 mm stands.
+
+## User (2026-11-08 20:29)
+
+use M2.5 for all, set holes to 2.5
+
+## Claude (2026-11-08 20:29)
+
+All stand holes are now 2.5 mm for M2.5 screws, set by one `screw_hole` value in `VallekilenSCB.scad`. The STL, thumbnail and catalog are updated.
+
+**M2.5 screws won't go through the 40/60 board's 2.2 mm holes.** Drill those four holes out to 2.7–3.0 mm. They are 0.75 mm from the board edges, so drill carefully.
+
+- **Larger board:** drill its holes at 2.7–3.0 mm too, for the same screws.
+- **L9110:** the board's 2.5 mm holes take M2.5, though tightly.
+- **Stand holes:** the 2.5 mm holes print at about 2.1 mm, which is right for M2.5 self-tapping screws.
+
+Nothing is committed.
+
+## User (2026-11-08 20:30)
+
+The main board fastener holes, the "ears" - make them 3.2 mm. Also make a round ear onm the left side of the board, matching the one on right side
+
+## Claude (2026-11-08 20:30)
+
+All four ear holes are now 3.2 mm, and there is a round ear on the left side that mirrors the right one. A cross-section of the export confirms both.
+
+- **Top tabs:** holes at (8.0, 144.9) and (75.9, 144.9).
+- **Round ears:** at the same height, y = 41.7, with holes 5 mm outside the plate edge on each side.
+
+With the new ear the part is 103.9 mm wide, and the plate itself is still 83.9 mm. The STL, thumbnail and catalog are updated. Nothing is committed.
+
+## User (2026-11-08 20:32)
+
+can you send this to the 3dprinter, or do I need to use the CUra program for that ?
+
+## Claude (2026-11-08 20:32)
+
+You need Cura. I can't send it to the printer properly myself.
+
+The STL has to be sliced into G-code first, using your print profile. Cura does that, with `BracketStrong` or `FlashAlike2`. Two shortcuts exist, but I don't recommend either:
+- **Slicing without the Cura window.** Cura's slicing engine can be run from the command line, but it needs the full Ultimaker 3 printer and material settings passed by hand. It is fragile and easy to get wrong.
+- **Sending over the network.** The Ultimaker 3 accepts print jobs through its network interface, but it has to be paired with an approval on the printer first. That's what Cura's "Print over network" does.
+
+The workflow in Cura is three steps:
+1. Open `DMJK\VallekilenSCB.stl` and choose `FlashAlike2`. `BracketStrong` is meant for brackets that need strength, but it would work too.
+2. Slice it.
+3. Click Print over network, or save to a USB stick.
+
+Set adhesion to Skirt or Brim, whichever you like. VallekilenSCB has no modelled brim, so a Cura brim is fine here; it was the slotted brackets that couldn't have one.
+
+## User (2026-11-08 20:34)
+
+there are many FlashAlike, which one ?
+
+## Claude (2026-11-08 20:35)
+
+Use **BracketStrong**. Earlier I said FlashAlike2, but now that I've seen your Cura profiles, BracketStrong is the better fit. Its 5 walls (2 mm each side) fill almost all of each 8 mm stand around the screw hole, so the stands won't split when you drive in the self-tapping screws.
+
+I looked at the profiles saved in your Cura 5.13 settings. The Flash ones:
+
+| Profile             | What it changes                                      |
+|---------------------|------------------------------------------------------|
+| FlashALike          | 0.18 layers, 15 % grid infill, speed 60, brim         |
+| FlashALike-2        | Same, plus slower walls (20)                          |
+| FlashAlike-Fast-1   | 15 % infill, fast infill (100), walls 30              |
+| Flash alike Fast #2 | Only a 5 mm brim; this is `FlashAlike2.curaprofile`  |
+
+All of these keep Cura's default wall count and 15 % infill or less. That's fine for the plate, but weak for screw stands.
+
+Two things to check in Cura:
+- **Adhesion.** The BracketStrong in your Cura is the first import and still has `adhesion_type=brim`. That's fine for this plate. For the slotted brackets, re-import `BracketStrong.curaprofile` or switch adhesion to Skirt by hand.
+- **Extruder 2.** Several of the Flash profiles send support or adhesion to extruder 2, the faulty one. Some have `support_extruder_nr=1` and some `adhesion_extruder_nr=1`, and Cura numbers its extruders from 0, so 1 is extruder 2. If you use one of them, check that Cura moved those settings to extruder 1.
+
+## User (2026-11-08 20:38)
+
+There is a lot of unused area on this one. Can that be either made smaller, or adding a whole in the middle
+
+## Claude (2026-11-08 20:39)
+
+I added two holes in the empty areas, so about 30 % of the plate is now open. The outside size stays the same, and the STL, thumbnail and catalog are updated.
+
+| Hole                                       | Size (mm)    | Status |
+|--------------------------------------------|--------------|--------|
+| Lower right, beside the Larger board       | 24.2 × 62.0  | new    |
+| Left middle, between Larger board and L9110 | 26.8 × 29.4  | new    |
+| Under the Larger board                     | 15.0 × 37.9  | as before |
+| Under the power board                      | 18.3 × 38.3  | as before |
+
+- **Strength:** every hole keeps at least 5 mm of plate to the outer edge and around each stand. The ears and the plate's outer frame stay whole.
+- **Why holes instead of a smaller plate:** cutting away the lower right corner would also remove the right round ear, which sits in that area. The holes save almost as much material, and the plate stays stiff.
+- **Positions follow the boards:** the hole positions are worked out from where the boards and stands are, so they move if a board moves.
+
+To make the holes bigger, lower `frame` in the file. It sets the plate left around each stand, now 5 mm, and also the margin under the boards.
+
+The new names in the file are `window()` for a rectangular hole, `min_axis()` and `max_axis()` for the extreme stand positions, and `stand_clear` for the plate kept between a hole and a stand's centre.
+
+Nothing is committed.
+
+## User (2026-11-08 21:10)
+
+commit and push, directly on main
+
+## Claude (2026-11-08 21:10)
+
+I committed and pushed `7bf9c2a` directly to `main`, and nothing is left uncommitted.
+
+The commit contains:
+- **Board library:** `boards.scad` with the six boards (40/60, 25/65, Larger board, Arduino Uno, proto shield, L9110).
+- **VallekilenSCB:** `DMJK/VallekilenSCB.scad`, its STL and thumbnail.
+- **SVB brackets:** moved to `DMJK/`. Git recorded it as a move, so their history is kept.
+- **README and catalog:** updated. GitHub now shows the DMJK section.
+
+The chat log in `chatlogs/` is from an earlier save. It doesn't include the board library or VallekilenSCB work. Run `save_chatlog.py` again if you want it current.
+
+## User (2026-11-10 00:07)
 
 save chatlog
